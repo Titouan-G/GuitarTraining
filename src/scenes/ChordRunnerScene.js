@@ -66,7 +66,7 @@ export class ChordRunnerScene extends Phaser.Scene {
 
     this.best = load(`runnerBest${level}`, 0);
     Object.assign(this, { score: 0, speed: 220, over: false, jumping: false, queue: [] });
-    this.nextChord = createProgression(LEVELS[level].chords); // chords that sound good one after the other
+    this.nextChord = createProgression(LEVELS[level].chords);
     this.spawn();
   }
 

@@ -1,5 +1,3 @@
-import { chordByName } from '../audio/chords.js';
-
 // Chord Runner pools. Sharps only (detector names), no two names for the same notes.
 // New levels go at the end: records are saved by level index.
 export const LEVELS = [
@@ -10,32 +8,22 @@ export const LEVELS = [
   { name: 'Power chords', chords: ['E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5', 'C5', 'C#5', 'D5', 'D#5'] },
 ];
 
-// Keys as pitch-class sets: 12 major scales + 12 harmonic minor (so V7 -> i, like E7 -> Am, counts as "in key").
-const MAJOR = [0, 2, 4, 5, 7, 9, 11];
-const HARMONIC_MINOR = [0, 2, 3, 5, 7, 8, 11];
-const SCALES = [MAJOR, HARMONIC_MINOR].flatMap((steps) => Array.from({ length: 12 }, (_, root) => new Set(steps.map((s) => (root + s) % 12))));
-const inScale = (name, scale) => chordByName(name).pcs.every((pc) => scale.has(pc));
-
-// Chords of the pool grouped by key, keeping only keys with at least 3 of them (enough to vary).
-export const keysOf = (pool) => SCALES.map((s) => pool.filter((c) => inScale(c, s))).filter((chords) => chords.length >= 3);
-
-// Endless sequence that sounds good: PER_KEY chords from one key, then a pivot chord (shared by two keys) leads to the next key.
-export function createProgression(pool, rand = Math.random, perKey = 6) {
-  const keys = keysOf(pool);
-  const any = (arr) => arr[Math.floor(rand() * arr.length)];
-  let key = any(keys);
-  let count = 0;
+// Shuffle bag: every chord of the level comes up once, in random order, before the bag is reshuffled.
+// Max variety, no short loops; chords don't follow a key (Titouan preferred variety over harmony).
+export function createProgression(pool, rand = Math.random) {
+  let bag = [];
   let prev = null;
   return () => {
-    if (count >= perKey) {
-      const pivots = keys.filter((k) => k !== key && k.includes(prev));
-      if (pivots.length) key = any(pivots);
-      count = 0;
+    if (!bag.length) {
+      bag = [...pool];
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+      const last = bag.length - 1; // pop() takes from the end
+      if (bag[last] === prev) [bag[0], bag[last]] = [bag[last], bag[0]]; // never the same chord twice in a row across bags
     }
-    let chord;
-    do chord = any(key); while (chord === prev); // every key has 3+ chords, so this ends
-    count++;
-    prev = chord;
-    return chord;
+    prev = bag.pop();
+    return prev;
   };
 }

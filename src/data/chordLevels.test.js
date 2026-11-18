@@ -1,27 +1,32 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { LEVELS, keysOf, createProgression } from './chordLevels.js';
+import { LEVELS, createProgression } from './chordLevels.js';
 
 // Seeded random so a failure can be replayed.
 const seeded = (seed) => () => ((seed = (seed * 1664525 + 1013904223) % 2 ** 32) / 2 ** 32);
 
 for (const level of LEVELS) {
-  test(`${level.name}: every chord can come up, and chords follow each other in key`, () => {
-    const keys = keysOf(level.chords);
-    for (const c of level.chords) assert.ok(keys.some((k) => k.includes(c)), `${c} belongs to no key of this level`);
+  test(`${level.name}: each round plays every chord once, never twice in a row`, () => {
     const next = createProgression(level.chords, seeded(42));
-    const seen = new Set();
-    let prev = next();
-    for (let i = 0; i < 3000; i++) {
-      const c = next();
-      assert.notEqual(c, prev, 'same chord twice in a row');
-      assert.ok(keys.some((k) => k.includes(prev) && k.includes(c)), `${prev} -> ${c} share no key`);
-      seen.add(c);
-      prev = c;
+    const n = level.chords.length;
+    let prev = null;
+    for (let round = 0; round < 200; round++) {
+      const played = Array.from({ length: n }, () => next());
+      assert.deepEqual([...played].sort(), [...level.chords].sort(), `round ${round} is not a full shuffle`);
+      for (const c of played) {
+        assert.notEqual(c, prev, 'same chord twice in a row');
+        prev = c;
+      }
     }
-    assert.deepEqual([...seen].sort(), [...level.chords].sort(), 'some chords never come up');
   });
 }
+
+test('rounds are not all in the same order', () => {
+  const next = createProgression(LEVELS[0].chords, seeded(7));
+  const n = LEVELS[0].chords.length;
+  const orders = new Set(Array.from({ length: 20 }, () => Array.from({ length: n }, () => next()).join()));
+  assert.ok(orders.size > 15);
+});
 
 test('power chords level has all 12 roots', () => {
   assert.equal(LEVELS.at(-1).chords.length, 12);

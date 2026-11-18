@@ -5,7 +5,7 @@ Petits jeux dans le navigateur pour pratiquer la guitare : accords, tablatures e
 ## Les jeux
 
 - **Accordeur** (menu) : la note jouée, son écart en cents, et l'accord détecté avec les 12 notes entendues.
-- **Chord Runner** : un accord est affiché sur l'obstacle qui arrive. Joue-le et le blob saute tout seul. 5 niveaux : accords ouverts, barrés, 7/maj7/m7, sus/add9/dim, power chords. Les accords s'enchaînent dans une même tonalité, puis changent de tonalité par un accord commun.
+- **Chord Runner** : un accord est affiché sur l'obstacle qui arrive. Joue-le et le blob saute tout seul. 5 niveaux : accords ouverts, barrés, 7/maj7/m7, sus/add9/dim, power chords. Tous les accords du niveau sortent une fois, dans un ordre aléatoire, avant de recommencer, sans jamais deux fois le même accord d'affilée.
 - **Tab Hero** : une tablature défile, chaque note est jugée sur la hauteur et le timing (Parfait, Bien, Raté). Tempo, métronome et latence réglables. La latence se calibre toute seule en fin de partie.
 - **Intervalles** : « Tierce mineure ↑ de Sol ». Joue un Sol n'importe où sur le manche, puis la note à l'intervalle demandé depuis ce Sol. 4 niveaux, séries de 10 chronométrées. La réponse s'affiche avec son vrai nom (Si♭, pas La♯).
 
@@ -57,7 +57,7 @@ Un fichier mal écrit s'affiche en rouge dans la liste, avec l'erreur, au lieu d
 npm test
 ```
 
-Les tests couvrent la reconnaissance d'accords (sur des spectres de guitare simulés), le lissage de l'affichage, les tablatures et leur notation, l'orthographe des intervalles, et les enchaînements d'accords de Chord Runner.
+Les tests couvrent la reconnaissance d'accords (sur des spectres de guitare simulés), le lissage de l'affichage, les tablatures et leur notation, l'orthographe des intervalles, et le tirage des accords de Chord Runner.
 
 ## Technique
 
